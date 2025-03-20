@@ -1,12 +1,10 @@
-const KnightMoves = function (start, end) {
-  let graph = Array(7);
+export const KnightMoves = function (start, end) {
+  let graph = Array(8);
   for (let i = 0; i < graph.length; i++) {
-    graph[i] = Array(7);
+    graph[i] = Array(8);
   }
 
-  // console.log(graph);
-
-  function getMoves([i, j], [x, y]) {
+  const getMoves = function ([i, j], [x, y]) {
     if (i <= x && j <= y) {
       if (x - i >= y - j || j === y) {
         return [
@@ -104,9 +102,9 @@ const KnightMoves = function (start, end) {
         ];
       }
     }
-  }
+  };
 
-  function hasPosition(i, j, queue, positions) {
+  const hasPosition = function (i, j, queue, positions) {
     let hasPosition = false;
     for (let index = 0; index < positions.length; index++) {
       if (positions[index][0] === i && positions[index][1] === j) {
@@ -121,13 +119,14 @@ const KnightMoves = function (start, end) {
       }
     }
     return hasPosition;
-  }
+  };
 
-  function init([i, j], [x, y], queue = [[i, j]], positions = []) {
+  const init = function ([i, j], [x, y], queue = [[i, j]], positions = []) {
     positions.push([i, j]);
     if (queue.length <= 0) return;
     let possibleMoves = getMoves([i, j], [x, y]);
     const step = [i, j];
+
     let currentPosition = graph[i][j] ? graph[i][j] : [];
     for (let index = 0; index < possibleMoves.length; index++) {
       const move = possibleMoves[index];
@@ -150,30 +149,43 @@ const KnightMoves = function (start, end) {
     }
     graph[i][j] = currentPosition;
     queue.shift();
-    let path = getPath(queue[0], [x, y], queue, positions);
+    let path = init(queue[0], [x, y], queue, positions);
 
     if (path) return path;
-  }
+  };
 
-  function getPath([i, j], [x, y], count = 0) {
-    count++;
+  const getPath = function ([i, j], [x, y], count = 0) {
     if (i === x && j === y) {
-      let path = Array(count - 1);
-      path[count] = [i, j];
-      return path;
-    }
-    let nextMoves = graph[i][j];
-    if (nextMoves.length <= 0) return;
-    let path = getPath(nextMoves, [x, y], count);
-    for (let index = 1; index < nextMoves.length; index++) {
-      let nextPath = getPath(nextMoves, [x, y], count);
-      if (nextPath) {
+      if (count === 0) {
+        return [[i, j]];
+      } else {
+        let path = Array(count - 1);
+        path[count] = [i, j];
+        return path;
       }
     }
-  }
+    let nextMoves = graph[i][j];
+    if (!nextMoves) return;
+    if (nextMoves?.length <= 0) return;
+    count++;
+    for (let index = 0; index < nextMoves.length; index++) {
+      let nextPath = getPath(nextMoves[index], [x, y], count);
+      if (nextPath) {
+        nextPath[count - 1] = [i, j];
+        return nextPath;
+      }
+    }
+  };
+
+  const printMoves = function (path) {
+    console.log(`KnightMoves([${start[0]},${start[1]}],[${end[0]},${end[1]}])`);
+    console.log(`You made it in ${path.length - 1} moves`);
+    path.forEach((position) => {
+      console.log(position);
+    });
+  };
 
   init(start, end);
-  return getPath(start, end);
+  let path = getPath(start, end);
+  printMoves(path);
 };
-
-console.log(KnightMoves([0, 0], [3, 3]));
